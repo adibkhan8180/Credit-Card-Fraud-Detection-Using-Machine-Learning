@@ -6,7 +6,9 @@ from sklearn.metrics import accuracy_score
 import streamlit as st
 from streamlit_option_menu import option_menu
 import base64
+import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
 
 # load data
 data = pd.read_csv('creditcard.csv')
@@ -64,57 +66,80 @@ if __name__ == "__main__":
             else:
                 st.error('Fraudulent transaction', icon="🚨")
 
-        # # Custom HTML and CSS for the footer
-        # footer_style = f"""
-        #     <style>
-        #         .footer {{
-        #             background: #ff4b4b;
-        #             color: white;
-        #             padding: 10px;
-        #             position: fixed;
-        #             bottom: 0;
-        #             width: 90vw;
-        #             text-align: center;
-        #             font-size: 20px;
-        #         }}
-        #     </style>
-        # """
+        # Custom HTML and CSS for the footer
+        footer_style = f"""
+            <style>
+                .footer {{
+                    background: #ff4b4b;
+                    color: white;
+                    padding: 10px;
+                    position: fixed;
+                    bottom: 0;
+                    width: 90vw;
+                    text-align: center;
+                    font-size: 20px;
+                }}
+            </style>
+        """
 
-        # # Display the custom HTML
-        # st.markdown(footer_style, unsafe_allow_html=True)
+        # Display the custom HTML
+        st.markdown(footer_style, unsafe_allow_html=True)
 
-        # # Your Streamlit app content goes here
+        # Your Streamlit app content goes here
 
-        # # Display the footer
-        # def img_to_bytes(img_path):
-        #     img_bytes = Path(img_path).read_bytes()
-        #     encoded = base64.b64encode(img_bytes).decode()
-        #     return encoded
-        # def img_to_html(img_path):
-        #     img_html = "<img src='data:image/png;base64,{}' style='width: 100px; padding-left: 20px; padding-right: 20px' class='img-fluid'>".format(
-        #     img_to_bytes(img_path)
-        #     )
-        #     return img_html
+        # Display the footer
+        def img_to_bytes(img_path):
+            img_bytes = Path(img_path).read_bytes()
+            encoded = base64.b64encode(img_bytes).decode()
+            return encoded
+        def img_to_html(img_path):
+            img_html = "<img src='data:image/png;base64,{}' style='width: 100px; padding-left: 20px; padding-right: 20px' class='img-fluid'>".format(
+            img_to_bytes(img_path)
+            )
+            return img_html
 
-        # st.markdown(f"<div class='footer'>{img_to_html('assets/SGBAU.png')} Design and Developed By : Final Year Students, Computer Science and Engineering, H.V.P.M. Amravati. {img_to_html('assets/HVPM.png')}<div>", unsafe_allow_html=True)
-
-
-        # st.image('assets/HVPM.png', width=100)
-        # with st.markdown('<div class="footer">Design and Developed By : Final Year Students, Computer Science and Engineering, H.V.P.M. Amravati.</div>', unsafe_allow_html=True):
-        #     pass
-        # st.image('assets/SGBAU.png', width=100)
+        st.markdown(f"<div class='footer'>{img_to_html('assets/SGBAU.png')} Design and Developed By : Final Year Students, Computer Science and Engineering, H.V.P.M. Amravati. {img_to_html('assets/HVPM.png')}<div>", unsafe_allow_html=True)
 
 
         
         
     if selected == "Summary":
         st.title("Credit Card Fraud Detection Abstract")
-        st.subheader("Credit card fraud detection is presently the most frequently occurring problem in the present world. This is due to the rise in both online transactions and e-commerce platforms. Credit card fraud generally happens when the card was stolen for any of the unauthorized purposes or even when the fraudster uses the credit card information for his use. In the present world, we are facing a lot of credit card problems. To detect fraudulent activities the credit card fraud detection system was introduced. This project aims to focus mainly on machine learning algorithms. The algorithm used is the Logistic Regression. Logistic Regression is a popular machine learning algorithm used in various fields, including credit card fraud detection. In the context of credit card fraud detection, Logistic Regression can be employed to predict whether a given credit card transaction is fraudulent or not based on certain features. The methodology involves preprocessing the dataset to handle missing values, outliers, and scaling numerical features. The data is split into training and testing sets for model evaluation. The trained Logistic Regression model is assessed using metrics such as accuracy, precision, recall, F1 score, and the ROC-AUC curve. Feature importance analysis is conducted to understand the contribution of each feature in predicting fraud. The results demonstrate the effectiveness of Logistic Regression in credit card fraud detection, providing insights into its performance, interpretability, and potential for integration into broader fraud detection systems. The study concludes with recommendations for further research and the exploration of complementary techniques to enhance fraud detection capabilities. The study emphasizes the importance of continuous monitoring and model updates to adapt to evolving fraud patterns. The classification threshold is adjusted based on the specific requirements and costs associated with false positives and false negatives.")
+        # Function to display the PDF of a given file
+        def displayPDF(file):
+            try:
+                # Check if the file is a URL or a local file path
+                if urlparse(file).scheme:
+                    # If it has a scheme (http, https, etc.), treat it as a URL
+                    with urllib.request.urlopen(file) as f:
+                        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                else:
+                    # If it doesn't have a scheme, treat it as a local file path
+                    with open(file, 'rb') as f:
+                        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+
+                # Embedding PDF in HTML
+                pdf_display = F'<div style="text-align: center; width: 90vw;"><iframe src="data:application/pdf;base64,{base64_pdf}" width="1000" height="1250" type="application/pdf"></iframe></div>'
+
+                # Displaying File
+                st.markdown(pdf_display, unsafe_allow_html=True)
+
+            except urllib.error.URLError as e:
+                st.error(f"Error: Unable to fetch the PDF file. {e}")
+
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
+
+        # Example usage for a local file path
+        file_path = "Synopsis.pdf"
+        displayPDF(file_path)
+
+        
     if selected == "About":
         st.title(f"Group Members")
 
         st.header("Samarpeet Nandanwar") 
-        st.subheader("Roll No: 50, Final Year,  Computer Science & Engineering")
+        st.subheader("Roll No: 48, Final Year,  Computer Science & Engineering")
         st.divider()
 
         st.header("Adib Khan") 
@@ -131,38 +156,3 @@ if __name__ == "__main__":
 
         st.header("Himanshu kadu") 
         st.subheader("Roll No: 22, Final Year,  Computer Science & Engineering")
-
-
-    # Custom HTML and CSS for the footer
-    footer_style = f"""
-        <style>
-            .footer {{
-                background: #ff4b4b;
-                color: white;
-                padding: 10px;
-                position: fixed;
-                bottom: 0;
-                width: 90vw;
-                text-align: center;
-                font-size: 20px;
-            }}
-        </style>
-    """
-
-    # Display the custom HTML
-    st.markdown(footer_style, unsafe_allow_html=True)
-
-    # Your Streamlit app content goes here
-
-    # Display the footer
-    def img_to_bytes(img_path):
-        img_bytes = Path(img_path).read_bytes()
-        encoded = base64.b64encode(img_bytes).decode()
-        return encoded
-    def img_to_html(img_path):
-        img_html = "<img src='data:image/png;base64,{}' style='width: 100px; padding-left: 20px; padding-right: 20px' class='img-fluid'>".format(
-        img_to_bytes(img_path)
-        )
-        return img_html
-
-    st.markdown(f"<div class='footer'>{img_to_html('assets/SGBAU.png')} Design and Developed By : Final Year Students, Computer Science and Engineering, H.V.P.M. Amravati. {img_to_html('assets/HVPM.png')}<div>", unsafe_allow_html=True)
